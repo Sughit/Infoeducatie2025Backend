@@ -1,0 +1,25 @@
+{
+  "name": "code-evaluator",
+  "version": "1.0.0",
+  "main": "codeEvaluator.js",
+  "scripts": {
+    "start": "node codeEvaluator.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "uuid": "^9.0.1"
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sughit/Infoeducatie2025Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Sughit/Infoeducatie2025Backend/issues"
+  },
+  "homepage": "https://github.com/Sughit/Infoeducatie2025Backend#readme"
+}
