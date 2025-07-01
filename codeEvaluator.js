@@ -1,6 +1,6 @@
 const express = require('express');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
 
@@ -49,9 +49,21 @@ app.post('/evaluate', async (req, res) => {
         }
 
         const { input, output: expected } = testCases[i];
+        const proc = spawn(exePath);
 
-        exec(`"${exePath}"`, { input, timeout: 3000 }, (err, stdout, stderr) => {
-          const actual = (stdout || stderr || '').trim();
+        let stdout = '';
+        let stderr = '';
+
+        proc.stdout.on('data', (data) => {
+          stdout += data.toString();
+        });
+
+        proc.stderr.on('data', (data) => {
+          stderr += data.toString();
+        });
+
+        proc.on('close', () => {
+          const actual = (stdout || stderr).trim();
           const expectedClean = expected.trim();
           const ok = actual === expectedClean;
 
@@ -60,6 +72,10 @@ app.post('/evaluate', async (req, res) => {
 
           runTest(i + 1);
         });
+
+        // Trimite input-ul către stdin
+        proc.stdin.write(input);
+        proc.stdin.end();
       };
 
       runTest(0);
@@ -70,14 +86,24 @@ app.post('/evaluate', async (req, res) => {
     return res.status(500).json({ error: 'Eroare internă la server' });
   }
 
-  // 🧽 Funcție de curățare
   function cleanup() {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    if (fs.existsSync(exePath)) fs.unlinkSync(exePath);
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (err) {
+      console.warn('⚠️ Nu s-a putut șterge fișierul .cpp:', err.message);
+    }
+
+    setTimeout(() => {
+      try {
+        if (fs.existsSync(exePath)) fs.unlinkSync(exePath);
+      } catch (err) {
+        console.warn('⚠️ Nu s-a putut șterge fișierul .out:', err.message);
+      }
+    }, 100);
   }
 });
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Evaluatorul rulează pe http://localhost:${PORT}`);
+  console.log(`✅ Evaluatorul rulează pe http://localhost:${PORT}`);
 });
