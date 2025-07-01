@@ -4,6 +4,9 @@
   "main": "codeEvaluator.js",
   "scripts": {
     "start": "node codeEvaluator.js"
+  },  
+  "engines": {
+    "node": "18"
   },
   "dependencies": {
     "cors": "^2.8.5",
